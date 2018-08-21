@@ -1,0 +1,30 @@
+{
+  "name": "sreda",
+  "version": "0.0.0-dev",
+  "description": "Read your env variables from SSM",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage"
+  },
+  "keywords": [
+    "lambda",
+    "sls",
+    "ssm",
+    "kms",
+    "aws"
+  ],
+  "author": "Igor",
+  "license": "MIT",
+  "homepage": "https://github.com/igorkosta/sreda",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:igorkosta/sreda.git"
+  },
+  "bugs": {
+    "url": "https://github.com/igorkosta/sreda/issues"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.297.0",
+    "jest": "^23.5.0"
+  }
+}
