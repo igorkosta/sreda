@@ -4,7 +4,8 @@
   "description": "Read your env variables from SSM",
   "main": "index.js",
   "scripts": {
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "watch": "jest --watchAll"
   },
   "keywords": [
     "lambda",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "aws-sdk": "^2.297.0",
+    "aws-sdk-mock": "^4.1.0",
     "jest": "^23.5.0",
     "standard": "^11.0.1"
   }
