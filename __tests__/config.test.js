@@ -1,11 +1,11 @@
 /* eslint-env jest */
 'use strict'
 
-const { load } = require('../lib/config')
+const { read, keys } = require('../lib/config')
 const AWS = require('aws-sdk')
 let ssm = new AWS.SSM()
 
-const ssmPromise = {
+var ssmPromise = {
   promise: jest.fn().mockImplementation((request) => {
     return new Promise((resolve, reject) => {
       const response = {
@@ -40,10 +40,50 @@ describe('mock AWS.SSM()', () => {
     process.env.NODE_ENV = 'production'
   })
 
-  it('getParameters', async () => {
-    const configResponse = load(ssm, ['foo', 'bar'])
-    // const params = await ssm.getParameters()
-    const r = await configResponse.keys.foo
-    console.log(r)
+  it(`throws an error if expiryMs <=0`, async () => {
+    function throwsErr () {
+      read(ssm, ['foo', 'bar'], 0)
+    }
+    expect(throwsErr).toThrowError(`You need to specify an expiry (ms) greater than 0, or leave it undefined`)
+  })
+
+  it(`throws an error if no keys are providerd`, async () => {
+    function throwsErr () {
+      read(ssm, [])
+    }
+    expect(throwsErr).toThrowError(`You need to provide a non-empty array of config keys`)
+  })
+
+  it(`throws an error if some keys are missing`, async () => {
+    expect(keys(ssm, ['foobar'])).rejects.toEqual(new Error(`Missing SSM Parameter Store keys: foobar`))
+    // expect(async () => { await keys(ssm, ['foobar']) }).toThrow(new Error())
+  })
+
+  it(`return keys with values`, async () => {
+    const envKeys = await keys(ssm, ['foo', 'bar'])
+    expect(envKeys).toEqual({
+      'bar': 'barfoorista',
+      'foo': 'isitbecauseIamblack?'
+    })
+  })
+
+  it(`throws an error when ssm is throwing one`, async () => {
+    ssm = {
+      getParameters: () => {
+        return {
+          promise: jest.fn().mockImplementation((request) => {
+            return new Promise((resolve, reject) => {
+              return reject(new Error('foobar'))
+            }).catch(() => console.log('Ok'))
+          })
+        }
+      }
+    }
+    expect(await keys(ssm, ['foo'])).toThrow(`foobar`)
+  })
+
+  it(`config.load successfully loads the key values`, async () => {
+    const configResponse = read(ssm, ['foo', 'bar'])
+    console.log(`KEYS: ${JSON.stringify(configResponse)}`)
   })
 })
