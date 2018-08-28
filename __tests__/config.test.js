@@ -1,6 +1,7 @@
 /* eslint-env jest */
 'use strict'
 
+const EventEmitter = require('events')
 const { read, keys } = require('../lib/config')
 const AWS = require('aws-sdk')
 let ssm = new AWS.SSM()
@@ -83,19 +84,13 @@ describe('mock AWS.SSM()', () => {
 
   it(`config.load successfully loads the key values`, async () => {
     const configResponse = read(ssm, ['foo', 'bar'])
-    const config = {
-      keys: {
-        foo: new Promise((resolve, reject) => { return resolve(true) }),
-        bar: new Promise((resolve, reject) => { return resolve(true) })
-      },
-      onRefresh: function () {},
-      onRefreshError: function () {}
+    const listener = () => {
+      return `refresh`
     }
-    // const config = {'keys': {'bar': {}, 'foo': {}}}
+    expect(configResponse.onRefresh(listener)).toHaveProperty('_events')
+    expect(configResponse.onRefreshError(listener)).toHaveProperty('_events')
     expect(configResponse).toHaveProperty('onRefresh')
     expect(configResponse).toHaveProperty('onRefreshError')
-    expect(JSON.stringify(configResponse)).toEqual(JSON.stringify(config))
-    console.log(`KEYS: ${JSON.stringify(configResponse)}`)
   })
 
   it(`uses process.env when not in production`, async () => {
