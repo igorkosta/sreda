@@ -56,7 +56,6 @@ describe('mock AWS.SSM()', () => {
 
   it(`throws an error if some keys are missing`, async () => {
     expect(keys(ssm, ['foobar'])).rejects.toEqual(new Error(`Missing SSM Parameter Store keys: foobar`))
-    // expect(async () => { await keys(ssm, ['foobar']) }).toThrow(new Error())
   })
 
   it(`return keys with values`, async () => {
@@ -74,16 +73,38 @@ describe('mock AWS.SSM()', () => {
           promise: jest.fn().mockImplementation((request) => {
             return new Promise((resolve, reject) => {
               return reject(new Error('foobar'))
-            }).catch(() => console.log('Ok'))
+            })
           })
         }
       }
     }
-    expect(await keys(ssm, ['foo'])).toThrow(`foobar`)
+    expect(keys(ssm, ['foo'])).rejects.toEqual(new Error(`foobar`))
   })
 
   it(`config.load successfully loads the key values`, async () => {
     const configResponse = read(ssm, ['foo', 'bar'])
+    const config = {
+      keys: {
+        foo: new Promise((resolve, reject) => { return resolve(true) }),
+        bar: new Promise((resolve, reject) => { return resolve(true) })
+      },
+      onRefresh: function () {},
+      onRefreshError: function () {}
+    }
+    // const config = {'keys': {'bar': {}, 'foo': {}}}
+    expect(configResponse).toHaveProperty('onRefresh')
+    expect(configResponse).toHaveProperty('onRefreshError')
+    expect(JSON.stringify(configResponse)).toEqual(JSON.stringify(config))
     console.log(`KEYS: ${JSON.stringify(configResponse)}`)
+  })
+
+  it(`uses process.env when not in production`, async () => {
+    process.env.NODE_ENV = 'development'
+    process.env.foo = 'foodev'
+    process.env.bar = 'bardev'
+    expect(await keys(ssm, ['foo', 'bar'])).toEqual({
+      foo: 'foodev',
+      bar: 'bardev'
+    })
   })
 })
