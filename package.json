@@ -1,6 +1,6 @@
 {
   "name": "sreda",
-  "version": "0.0.0-dev",
+  "version": "0.0.1-dev",
   "description": "Read your env variables from SSM",
   "main": "index.js",
   "scripts": {

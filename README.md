@@ -1,4 +1,4 @@
-# sreda [![npm version](https://badge.fury.io/js/sreda.svg)](https://badge.fury.io/js/sreda)
+# sreda [ ![Codeship Status for igorkosta/sreda](https://app.codeship.com/projects/1be41bd0-8dc9-0136-e9f8-06d455009a92/status?branch=master)](https://app.codeship.com/projects/303735) [![npm version](https://badge.fury.io/js/sreda.svg)](https://badge.fury.io/js/sreda)
 What would you use `sreda` for?
 
 There is a very nice article by [Yan Cui](https://theburningmonk.com/) that
