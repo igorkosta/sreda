@@ -1,7 +1,6 @@
 /* eslint-env jest */
 'use strict'
 
-const EventEmitter = require('events')
 const { read, keys } = require('../lib/config')
 const AWS = require('aws-sdk')
 let ssm = new AWS.SSM()
@@ -41,18 +40,25 @@ describe('mock AWS.SSM()', () => {
     process.env.NODE_ENV = 'production'
   })
 
+  it(`throws an error if SSM is not provided`, async () => {
+    function throwsErr () {
+      read()
+    }
+    expect(throwsErr).toThrow(new Error(`You need to initialize SSM and provide it as first argument of the function call`))
+  })
+
   it(`throws an error if expiryMs <=0`, async () => {
     function throwsErr () {
       read(ssm, ['foo', 'bar'], 0)
     }
-    expect(throwsErr).toThrowError(`You need to specify an expiry (ms) greater than 0, or leave it undefined`)
+    expect(throwsErr).toThrow(new Error(`You need to specify an expiry (ms) greater than 0, or leave it undefined`))
   })
 
   it(`throws an error if no keys are providerd`, async () => {
     function throwsErr () {
       read(ssm, [])
     }
-    expect(throwsErr).toThrowError(`You need to provide a non-empty array of config keys`)
+    expect(throwsErr).toThrow(new Error(`You need to provide a non-empty array of config keys`))
   })
 
   it(`throws an error if some keys are missing`, async () => {
@@ -82,7 +88,7 @@ describe('mock AWS.SSM()', () => {
     expect(keys(ssm, ['foo'])).rejects.toEqual(new Error(`foobar`))
   })
 
-  it(`config.load successfully loads the key values`, async () => {
+  it(`successfully loads the config`, async () => {
     const configResponse = read(ssm, ['foo', 'bar'])
     const listener = () => {
       return `refresh`
