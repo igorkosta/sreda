@@ -21,7 +21,7 @@ You can find more about it in Yan's [article](https://hackernoon.com/you-should-
 # Load the configuration
 If you want to load the configuration for certain keys from SSM, you have to:
 
-```
+```js
 const { read } = require('sreda')
 const AWS = require('aws-sdk')
 const ssm = new AWS.SSM({
