@@ -37,12 +37,74 @@ const anotherConfig = read(
   ssm,
   ['fizz', 'buzz']) // default cache expiration is 3 minutes
 
-module.exports = async () => {
-  return {
+exports.handler = async (event, context, callback) => {
+  let keys = {
     foo: await config.keys.foo,
     bar: await config.keys.bar,
     fizz: await anotherConfig.keys.fizz,
     buzz: await anotherConfig.keys.buzz
   }
+
+  const response = {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: `SSM Keys`,
+      keys
+    })
+  }
+  callback(null, response)
 }
+```
+
+Alternatively you can make use of the `keys` function that return a `json`
+object with `key/value` pairs of your `ssm` keys, e.g.
+
+```js
+const { keys } = require('sreda')
+const AWS = require('aws-sdk')
+const ssm = new AWS.SSM({
+  region: 'us-west-1'
+})
+
+exports.handler = async (event, context, callback) => {
+  let keys = await keys(ssm, ['foo', 'bar'])
+
+  const response = {
+    statusCode: 200,
+    body: JSON.stringify({
+      message: `SSM Keys`,
+      keys
+    })
+  }
+  callback(null, response)
+}
+```
+
+# SSM and iamRoleStatements
+In order for your lambda function to access the `SSM` it has to:
+* have access to the internet
+* have rights to get the parameters from `SSM`
+
+To allow your lambda function to access `SSM` you have to put similar
+`iamRoleStatements` section into your `provider` block
+
+Please note, in order to be able to use CloudFormation Pseudo Parameters, like
+${AWS::Region} and ${AWS::AccountId} you have to use a `variableSyntax`
+parameter with the value you see in the example below and you should use
+`'Fn::Sub'` when assembling your `Resource`
+
+```yaml
+provider:
+  name: aws
+  runtime: nodejs8.10
+  variableSyntax: "\\${((?!AWS)[ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}"
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action: 'ssm:GetParameters'
+      Resource:
+        - 'Fn::Sub': 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/*'
+    - Effect: 'Allow'
+      Action: 'kms:Decrypt'
+      Resource:
+        - 'Fn::Sub': 'arn:aws:kms:us-east-1:${AWS::AccountId}:key/<your-kms-key>'
 ```
