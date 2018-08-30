@@ -108,3 +108,25 @@ provider:
       Resource:
         - 'Fn::Sub': 'arn:aws:kms:us-east-1:${AWS::AccountId}:key/<your-kms-key>'
 ```
+
+Through the `iamRoleStatements` you can also granulary manage the access of
+your lambda function to `SSM`
+
+```yaml
+provider:
+  name: aws
+  runtime: nodejs8.10
+  variableSyntax: "\\${((?!AWS)[ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}"
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action: 'ssm:GetParameters'
+      Resource:
+        - 'Fn::Sub':
+          'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/foo'
+        - 'Fn::Sub':
+          'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bar'
+    - Effect: 'Allow'
+      Action: 'kms:Decrypt'
+      Resource:
+        - 'Fn::Sub': 'arn:aws:kms:us-east-1:${AWS::AccountId}:key/<your-kms-key>'
+```
