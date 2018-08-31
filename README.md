@@ -130,3 +130,6 @@ provider:
       Resource:
         - 'Fn::Sub': 'arn:aws:kms:us-east-1:${AWS::AccountId}:key/<your-kms-key>'
 ```
+
+# Developing locally
+If you use `sreda` while developing locally, you can set `process.env.NODE_ENV = 'local'` and use the environment variables set in `process.env`.
