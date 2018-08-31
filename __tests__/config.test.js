@@ -37,7 +37,6 @@ ssm = { getParameters: () => { return ssmPromise } }
 
 describe('mock AWS.SSM()', () => {
   beforeAll(async () => {
-    process.env.NODE_ENV = 'production'
   })
 
   it(`throws an error if SSM is not provided`, async () => {
@@ -99,8 +98,8 @@ describe('mock AWS.SSM()', () => {
     expect(configResponse).toHaveProperty('onRefreshError')
   })
 
-  it(`uses process.env when not in production`, async () => {
-    process.env.NODE_ENV = 'development'
+  it(`uses process.env locally`, async () => {
+    process.env.NODE_ENV = 'local'
     process.env.foo = 'foodev'
     process.env.bar = 'bardev'
     expect(await keys(ssm, ['foo', 'bar'])).toEqual({
